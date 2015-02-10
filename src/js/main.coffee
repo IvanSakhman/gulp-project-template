@@ -1,7 +1,7 @@
 React = require 'react'
 $     = require 'jquery'
 
-RadComponent = require './rad-component.cjsx'
+RadComponent = require './views/rad-component.cjsx'
 
 $ ->
   React.render RadComponent({rad:"mos def"}),
