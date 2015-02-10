@@ -22,8 +22,12 @@ module.exports = React.createClass
   onMoreRads: ->
     radActions.incrementRadsBy.push 1
 
+  onLessRads: ->
+    radActions.incrementRadsBy.push -1
+
   render: ->
     <div className="rad-component">
       <p>is this component rad? {@state.amountOfRads}</p>
       <button type="button" onClick={@onMoreRads}>Sí</button>
+      <button type="button" onClick={@onLessRads}>No</button>
     </div>
