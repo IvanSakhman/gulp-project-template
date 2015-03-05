@@ -1,22 +1,22 @@
-browserify = require 'browserify'
-chalk      = require 'chalk'
-CSSmin     = require 'gulp-minify-css'
-ecstatic   = require 'ecstatic'
-es         = require 'event-stream'
-gulp       = require 'gulp'
-gutil      = require 'gulp-util'
-jade       = require 'gulp-jade'
-livereload = require 'gulp-livereload'
-path       = require 'path'
-plumber    = require 'gulp-plumber'
-prefix     = require 'gulp-autoprefixer'
-prettyTime = require 'pretty-hrtime'
-rename     = require 'gulp-rename'
-source     = require 'vinyl-source-stream'
-streamify  = require 'gulp-streamify'
-stylus     = require 'gulp-stylus'
-uglify     = require 'gulp-uglify'
-watchify   = require 'watchify'
+browserify  = require 'browserify'
+browserSync = require 'browser-sync'
+chalk       = require 'chalk'
+CSSmin      = require 'gulp-minify-css'
+ecstatic    = require 'ecstatic'
+es          = require 'event-stream'
+filter      = require 'gulp-filter'
+gulp        = require 'gulp'
+gutil       = require 'gulp-util'
+jade        = require 'gulp-jade'
+path        = require 'path'
+prefix      = require 'gulp-autoprefixer'
+prettyTime  = require 'pretty-hrtime'
+source      = require 'vinyl-source-stream'
+sourcemaps   = require 'gulp-sourcemaps'
+streamify   = require 'gulp-streamify'
+stylus      = require 'gulp-stylus'
+uglify      = require 'gulp-uglify'
+watchify    = require 'watchify'
 
 production = process.env.NODE_ENV is 'production'
 
@@ -67,22 +67,28 @@ gulp.task 'templates', ->
     .on 'error', handleError
     .pipe gulp.dest config.templates.destination
 
-  pipeline = pipeline.pipe livereload(auto: false) unless production
+  pipeline = pipeline.pipe browserSync.reload(stream: true) unless production
 
   pipeline
 
 gulp.task 'styles', ->
-  styles = gulp
-    .src config.styles.source
-    .pipe stylus
+  styles = gulp.src config.styles.source
+  styles = styles.pipe(sourcemaps.init()) unless production
+  styles = styles.pipe stylus
       'include css': true
 
     .on 'error', handleError
     .pipe prefix 'last 2 versions', 'Chrome 34', 'Firefox 28', 'iOS 7'
 
   styles = styles.pipe(CSSmin()) if production
+  styles = styles.pipe(sourcemaps.write '.') unless production
   styles = styles.pipe gulp.dest config.styles.destination
-  styles = styles.pipe livereload(auto: false) unless production
+
+  unless production
+    styles = styles
+      .pipe filter '**/*.css'
+      .pipe browserSync.reload(stream: true)
+
   styles
 
 gulp.task 'assets', ->
@@ -91,13 +97,12 @@ gulp.task 'assets', ->
     .pipe gulp.dest config.assets.destination
 
 gulp.task 'server', ->
-  require('http')
-    .createServer ecstatic root: path.join(__dirname, 'public')
-    .listen 9001
+  browserSync
+    port:      9001
+    server:
+      baseDir: './public'
 
 gulp.task 'watch', ->
-  livereload.listen()
-
   gulp.watch config.templates.watch, ['templates']
   gulp.watch config.styles.watch, ['styles']
   gulp.watch config.assets.watch, ['assets']
@@ -115,12 +120,12 @@ gulp.task 'watch', ->
     start = process.hrtime()
     build = bundle.bundle()
       .on 'error', handleError
-
       .pipe source config.scripts.filename
 
     build
       .pipe gulp.dest config.scripts.destination
-      .pipe(livereload())
+      .pipe(browserSync.reload(stream: true))
+
     gutil.log "Finished '#{chalk.cyan 'rebundle'}' after #{chalk.magenta prettyTime process.hrtime start}"
 
   .emit 'update'
