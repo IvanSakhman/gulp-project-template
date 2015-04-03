@@ -1,13 +1,11 @@
-/*** @jsx React.DOM */
+import { default as React } from 'react';
 
-var React = require('react');
-
-var APP = React.createClass({
-    render:function(){
-        return (
-                <h1>Hello World</h1>
-            )
-    }
+var App = React.createClass({
+  render(){
+    return (
+      <h1>Hello World</h1>
+    )
+  }
 });
 
-React.renderComponent(<APP />, document.body)
+React.render(<App />, document.body)
