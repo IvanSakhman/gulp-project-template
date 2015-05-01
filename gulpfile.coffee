@@ -1,16 +1,18 @@
 browserify = require 'browserify'
+browserSync = require 'browser-sync'
+chalk      = require 'chalk'
 CSSmin     = require 'gulp-minify-css'
 ecstatic   = require 'ecstatic'
+filter = require 'gulp-filter'
 gulp       = require 'gulp'
 gutil      = require 'gulp-util'
 jade       = require 'gulp-jade'
-livereload = require 'gulp-livereload'
 notify     = require 'gulp-notify'
 path       = require 'path'
-plumber    = require 'gulp-plumber'
 prefix     = require 'gulp-autoprefixer'
-rename     = require 'gulp-rename'
+prettyTime = require 'pretty-hrtime'
 source     = require 'vinyl-source-stream'
+sourcemaps = require 'gulp-sourcemaps'
 streamify  = require 'gulp-streamify'
 stylus     = require 'gulp-stylus'
 uglify     = require 'gulp-uglify'
@@ -18,7 +20,7 @@ watchify   = require 'watchify'
 
 production = process.env.NODE_ENV is 'production'
 
-paths =
+config =
   scripts:
     source: './src/js/main.js'
     destination: './public/js/'
